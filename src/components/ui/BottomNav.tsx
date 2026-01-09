@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Wallet, Users, User, Trophy } from 'lucide-react'
+import { Home, Wallet, Users, User, Trophy, Map } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function BottomNav() {
@@ -10,8 +10,8 @@ export function BottomNav() {
 
     const items = [
         { href: '/inicio', label: 'Início', icon: Home },
+        { href: '/mapa', label: 'Mapa', icon: Map },
         { href: '/comunidade', label: 'Comunidade', icon: Users },
-        { href: '/pagamentos', label: 'Pagamentos', icon: Wallet },
         { href: '/ranking', label: 'Ranking', icon: Trophy },
         { href: '/perfil', label: 'Perfil', icon: User },
     ]
