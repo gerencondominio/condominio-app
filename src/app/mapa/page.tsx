@@ -144,7 +144,7 @@ export default function MapPage() {
     const rightLots = MOCK_LOTS.filter(l => l.side === 'right')
 
     const isLotFiltered = (lot: typeof MOCK_LOTS[0]) => {
-        return searchTerm && !filteredLots.some(fl => fl.lote === lot.lote)
+        return !!searchTerm && !filteredLots.some(fl => fl.lote === lot.lote)
     }
 
     const handleClearSearch = () => {
