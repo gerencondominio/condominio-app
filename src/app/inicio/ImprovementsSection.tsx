@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Hammer } from 'lucide-react'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { ImprovementModal, type ImprovementFormData } from '@/components/admin/ImprovementModal'
 import { saveImprovement, deleteImprovement } from './actions'
 import { getIconComponent } from '@/components/ui/IconCarousel'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface Improvement {
     id: string
@@ -103,24 +104,22 @@ export function ImprovementsSection({ improvements, isAdmin }: ImprovementsSecti
                             </Button>
                         )}
                     </Card>
+                ) : activeImprovements.length === 0 ? (
+                    <EmptyState
+                        icon={Hammer}
+                        title="Nenhuma melhoria ativa"
+                        description="Não há melhorias em andamento no momento."
+                    />
                 ) : (
-                    activeImprovements.length > 0 ? (
-                        activeImprovements.map((improvement) => (
-                            <ImprovementItem
-                                key={improvement.id}
-                                improvement={improvement}
-                                isAdmin={isAdmin}
-                                onEdit={() => handleEdit(improvement)}
-                                onDelete={() => handleDelete(improvement.id)}
-                            />
-                        ))
-                    ) : (
-                        completedImprovements.length > 0 && !showCompleted && (
-                            <p className="text-sm text-center text-gray-500 py-4 bg-white rounded-xl border border-dashed border-gray-200">
-                                Todas as melhorias atuais foram concluídas! 🎉
-                            </p>
-                        )
-                    )
+                    activeImprovements.map((improvement) => (
+                        <ImprovementItem
+                            key={improvement.id}
+                            improvement={improvement}
+                            isAdmin={isAdmin}
+                            onEdit={() => handleEdit(improvement)}
+                            onDelete={() => handleDelete(improvement.id)}
+                        />
+                    ))
                 )}
             </div>
 

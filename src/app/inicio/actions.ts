@@ -185,6 +185,26 @@ export async function getFinancialStats() {
 
     return {
         totalArrecadado: Math.max(0, totalArrecadado),
-        totalTaxas
+        totalTaxas,
+        totalExtra: 0
     }
+}
+
+export async function getUserName() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return null
+
+    const { data } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
+
+    if (data?.full_name) {
+        return data.full_name.split(' ')[0]
+    }
+
+    return null
 }

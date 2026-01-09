@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Wallet, Users, User } from 'lucide-react'
+import { Home, Wallet, Users, User, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function BottomNav() {
@@ -10,8 +10,9 @@ export function BottomNav() {
 
     const items = [
         { href: '/inicio', label: 'Início', icon: Home },
-        { href: '/pagamentos', label: 'Pagamentos', icon: Wallet },
         { href: '/comunidade', label: 'Comunidade', icon: Users },
+        { href: '/pagamentos', label: 'Pagamentos', icon: Wallet },
+        { href: '/ranking', label: 'Ranking', icon: Trophy },
         { href: '/perfil', label: 'Perfil', icon: User },
     ]
 
@@ -21,7 +22,7 @@ export function BottomNav() {
     }
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 pb-safe pt-2 px-6 h-20 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-card border-t border-gray-100 dark:border-border pb-safe pt-2 px-6 h-20 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] z-50">
             <div className="flex justify-between items-center max-w-md mx-auto">
                 {items.map((item) => {
                     const Icon = item.icon
@@ -31,6 +32,11 @@ export function BottomNav() {
                         <Link
                             key={item.href}
                             href={item.href}
+                            onClick={() => {
+                                if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                                    navigator.vibrate(50);
+                                }
+                            }}
                             className={cn(
                                 "flex flex-col items-center gap-1 transition-colors relative min-w-[64px]",
                                 isActive ? "text-blue-600" : "text-gray-400 hover:text-gray-600"

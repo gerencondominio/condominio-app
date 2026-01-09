@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { ChevronRight, FileText } from 'lucide-react'
+import { ChevronRight, FileText, AlertCircle } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { AnimatedList, AnimatedItem } from '@/components/ui/AnimatedList'
 
 export default function PaymentsPage() {
     const invoices = [
@@ -24,32 +26,44 @@ export default function PaymentsPage() {
                     <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Histórico de Faturas</h2>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 gap-4">
-                        {invoices.map((invoice) => (
-                            <Link key={invoice.id} href={`/pagamentos/${invoice.id}`}>
-                                <Card className="p-4 flex items-center justify-between hover:border-blue-200 transition-colors cursor-pointer group h-full">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${invoice.status === 'pending' ? 'bg-orange-100 text-orange-600' : 'bg-blue-50 text-blue-600'
-                                            }`}>
-                                            <FileText className="h-6 w-6" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900">{invoice.month}</h3>
-                                            <p className="text-sm text-gray-500">Vencimento {invoice.date}</p>
-                                        </div>
-                                    </div>
+                        {invoices.length === 0 ? (
+                            <div className="col-span-full">
+                                <EmptyState
+                                    icon={AlertCircle}
+                                    title="Tudo em dia!"
+                                    description="Você não possui faturas pendentes ou histórico recente."
+                                />
+                            </div>
+                        ) : (
+                            invoices.map((invoice, index) => (
+                                <AnimatedItem key={invoice.id} index={index}>
+                                    <Link href={`/pagamentos/${invoice.id}`}>
+                                        <Card className="p-4 flex items-center justify-between hover:border-blue-200 transition-colors cursor-pointer group h-full">
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${invoice.status === 'pending' ? 'bg-orange-100 text-orange-600' : 'bg-blue-50 text-blue-600'
+                                                    }`}>
+                                                    <FileText className="h-6 w-6" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-semibold text-gray-900">{invoice.month}</h3>
+                                                    <p className="text-sm text-gray-500">Vencimento {invoice.date}</p>
+                                                </div>
+                                            </div>
 
-                                    <div className="text-right">
-                                        <p className="font-bold text-gray-900">{invoice.value}</p>
-                                        <Badge
-                                            variant={invoice.status === 'pending' ? 'warning' : 'success'}
-                                            className="mt-1"
-                                        >
-                                            {invoice.status === 'pending' ? 'Pendente' : 'Pago'}
-                                        </Badge>
-                                    </div>
-                                </Card>
-                            </Link>
-                        ))}
+                                            <div className="text-right">
+                                                <p className="font-bold text-gray-900">{invoice.value}</p>
+                                                <Badge
+                                                    variant={invoice.status === 'pending' ? 'warning' : 'success'}
+                                                    className="mt-1"
+                                                >
+                                                    {invoice.status === 'pending' ? 'Pendente' : 'Pago'}
+                                                </Badge>
+                                            </div>
+                                        </Card>
+                                    </Link>
+                                </AnimatedItem>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

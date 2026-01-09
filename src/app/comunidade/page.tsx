@@ -1,10 +1,12 @@
-import { Bell } from 'lucide-react'
+import { Bell, MessageSquare } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { PostCard } from '@/components/community/PostCard'
 import Link from 'next/link'
 import { getPosts } from './actions'
 import { CreatePostForm } from './CreatePostForm'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { AnimatedItem } from '@/components/ui/AnimatedList'
 
 export default async function CommunityPage(props: {
     searchParams?: Promise<{ filter?: string }>;
@@ -88,11 +90,17 @@ export default async function CommunityPage(props: {
                         {/* Feed */}
                         <div className="space-y-4">
                             {posts.length === 0 ? (
-                                <div className="text-center py-12 text-gray-500">
-                                    <p>Nenhuma postagem encontrada.</p>
-                                </div>
+                                <EmptyState
+                                    icon={MessageSquare}
+                                    title="Nenhuma publicação"
+                                    description={filter === 'Tudo' ? "Seja o primeiro a publicar algo para a comunidade!" : `Não há publicações em '${filter}' ainda.`}
+                                />
                             ) : (
-                                posts.map((post: any) => <PostCard key={post.id} post={post} />)
+                                posts.map((post: any, index: number) => (
+                                    <AnimatedItem key={post.id} index={index}>
+                                        <PostCard post={post} />
+                                    </AnimatedItem>
+                                ))
                             )}
                         </div>
                     </div>

@@ -1,51 +1,43 @@
-import { Bell, TrendingUp } from 'lucide-react'
+import { Bell, Zap, Calendar, FileText, UserPlus, FileWarning, Plus } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
-import { getImprovements, checkIsAdmin, getFinancialStats } from './actions'
+import { getImprovements, checkIsAdmin, getFinancialStats, getUserName } from './actions'
 import { ImprovementsSection } from './ImprovementsSection'
+import { BalanceCard } from '@/components/dashboard/BalanceCard'
+
 export default async function DashboardPage() {
     const improvements = await getImprovements()
     const isAdmin = await checkIsAdmin()
     const stats = await getFinancialStats()
+    const userName = await getUserName()
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24">
             {/* Header */}
-            <header className="flex items-center justify-between p-6 bg-white sticky top-0 z-10">
-                <h1 className="text-lg font-bold text-gray-900">Visão Geral</h1>
+            <header className="flex items-center justify-between p-6 bg-white sticky top-0 z-10 border-b border-gray-100 shadow-sm">
+                <div>
+                    <p className="text-xs text-gray-500 font-medium">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                    <h1 className="text-xl font-bold text-gray-900">Olá, {userName || 'Vizinho'}! 👋</h1>
+                </div>
                 <Link href="/notificacoes">
-                    <Button variant="ghost" size="icon" className="relative text-gray-500">
+                    <Button variant="ghost" size="icon" className="relative text-gray-500 hover:bg-gray-100 rounded-full">
                         <Bell className="h-6 w-6" />
                         <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border border-white"></span>
                     </Button>
                 </Link>
             </header>
 
-            <div className="p-6 space-y-6 max-w-md lg:max-w-6xl mx-auto">
+            <div className="p-6 space-y-8 max-w-md lg:max-w-6xl mx-auto">
 
                 <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
                     {/* Left Column: Finances */}
                     <div className="lg:col-span-7 space-y-6">
                         {/* Balance Card */}
-                        <Card className="bg-blue-600 border-none text-white p-6 md:p-8 shadow-blue-200 shadow-xl overflow-hidden relative">
-                            <div className="relative z-10">
-                                <p className="text-blue-100 text-sm font-medium mb-1">Saldo Líquido em Caixa</p>
-                                <h2 className="text-3xl md:text-5xl font-bold mb-4" suppressHydrationWarning>
-                                    R$ {stats.totalArrecadado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                </h2>
-                                <div className="inline-flex items-center gap-1 bg-blue-500/50 px-3 py-1 rounded-full text-xs font-medium">
-                                    <TrendingUp className="h-3 w-3" />
-                                    <span>Saldo disponível para melhorias</span>
-                                </div>
-                            </div>
-                            {/* Decorative shapes */}
-                            <div className="absolute right-0 top-0 h-32 w-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                            <div className="absolute left-0 bottom-0 h-24 w-24 bg-black/10 rounded-full blur-2xl -ml-10 -mb-10"></div>
-                        </Card>
+                        <BalanceCard amount={stats.totalArrecadado} taxas={stats.totalTaxas} />
 
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             {isAdmin && (
                                 <>
                                     <Card className="p-4 flex flex-col justify-center space-y-2 hover:border-blue-200 transition-colors">
@@ -56,6 +48,18 @@ export default async function DashboardPage() {
                                             <p className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">Arrecadação Bruta</p>
                                             <p className="text-lg font-bold text-gray-900" suppressHydrationWarning>
                                                 R$ {(stats.totalArrecadado + stats.totalTaxas).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </p>
+                                        </div>
+                                    </Card>
+
+                                    <Card className="p-4 flex flex-col justify-center space-y-2 hover:border-green-200 transition-colors">
+                                        <div className="bg-green-50 w-10 h-10 rounded-lg flex items-center justify-center text-green-600">
+                                            <Plus className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">Arrecadação Extra</p>
+                                            <p className="text-lg font-bold text-green-600" suppressHydrationWarning>
+                                                R$ {(stats.totalExtra || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </p>
                                         </div>
                                     </Card>
@@ -74,7 +78,7 @@ export default async function DashboardPage() {
                                 </>
                             )}
 
-                            <Card className={`p-4 flex flex-col justify-center space-y-2 hover:border-orange-200 transition-colors ${isAdmin ? 'lg:col-span-1 col-span-2' : 'col-span-2 lg:col-span-3'}`}>
+                            <Card className={`p-4 flex flex-col justify-center space-y-2 hover:border-orange-200 transition-colors ${isAdmin ? 'col-span-2 lg:col-span-1' : 'col-span-2 lg:col-span-4'}`}>
                                 <div className="bg-orange-50 w-10 h-10 rounded-lg flex items-center justify-center text-orange-600">
                                     <ToolIcon />
                                 </div>

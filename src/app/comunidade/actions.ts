@@ -9,14 +9,24 @@ export async function getPosts(filter?: string) {
 
     let query = supabase
         .from('community_posts')
-        .select('*')
+        .select(`
+            *,
+            author:profiles(full_name, lot_number),
+            community_likes(user_id),
+            likes_count:community_likes(count),
+            comments_count:community_comments(count)
+        `)
         .order('created_at', { ascending: false })
+        .limit(20)
 
     if (filter && filter !== 'Tudo') {
         const typeMap: Record<string, string> = {
+            'Sugestão': 'suggestion',
             'Sugestões': 'suggestion',
             'Manutenção': 'maintenance',
-            'Avisos': 'notice'
+            'Aviso': 'notice',
+            'Avisos': 'notice',
+            'Reclamação': 'complaint'
         }
         if (typeMap[filter]) {
             query = query.eq('type', typeMap[filter])
@@ -30,56 +40,30 @@ export async function getPosts(filter?: string) {
         return []
     }
 
-    // Manual fetch of relations to avoid FK errors
-    const postsWithData = await Promise.all(posts.map(async (post: any) => {
-        // Fetch Author
-        const { data: author } = await supabase
-            .from('profiles')
-            .select('full_name, lot_number')
-            .eq('id', post.user_id)
-            .single()
-
-        // Fetch Likes Count
-        const { count: likesCount } = await supabase
-            .from('community_likes')
-            .select('*', { count: 'exact', head: true })
-            .eq('post_id', post.id)
-
-        // Fetch Comments Count
-        const { count: commentsCount } = await supabase
-            .from('community_comments')
-            .select('*', { count: 'exact', head: true })
-            .eq('post_id', post.id)
-
-        // Check if liked by me
-        let likedByMe = false
-        if (user) {
-            const { data: like } = await supabase
-                .from('community_likes')
-                .select('id')
-                .eq('post_id', post.id)
-                .eq('user_id', user.id)
-                .single()
-            likedByMe = !!like
-        }
+    // Map to UI format
+    return posts.map((post: any) => {
+        const likedByMe = user ? post.community_likes.some((like: any) => like.user_id === user.id) : false
 
         return {
             id: post.id,
-            author: author?.full_name || 'Desconhecido',
-            location: author?.lot_number ? `Unidade ${author.lot_number}` : '',
+            author: post.author?.full_name || 'Desconhecido',
+            location: post.author?.lot_number ? `Unidade ${post.author.lot_number}` : '',
             time: post.created_at,
             content: post.content,
             type: post.type,
-            tags: [post.type === 'suggestion' ? 'Sugestão' : post.type === 'maintenance' ? 'Manutenção' : 'Aviso'],
-            likes: likesCount || 0,
-            likes_count: likesCount || 0,
-            comments: commentsCount || 0,
+            tags: [
+                post.type === 'suggestion' ? 'Sugestão' :
+                    post.type === 'maintenance' ? 'Manutenção' :
+                        post.type === 'complaint' ? 'Reclamação' :
+                            'Aviso'
+            ],
+            likes: post.likes_count?.[0]?.count || 0,
+            likes_count: post.likes_count?.[0]?.count || 0,
+            comments: post.comments_count?.[0]?.count || 0,
             isAdmin: post.is_admin_post,
             likedByMe
         }
-    }))
-
-    return postsWithData
+    })
 }
 
 export async function createPost(content: string, type: string) {
@@ -90,9 +74,12 @@ export async function createPost(content: string, type: string) {
 
     // Map UI types to DB types
     const typeMap: Record<string, string> = {
+        'Sugestão': 'suggestion',
         'Sugestões': 'suggestion',
         'Manutenção': 'maintenance',
-        'Avisos': 'notice'
+        'Aviso': 'notice',
+        'Avisos': 'notice',
+        'Reclamação': 'complaint'
     }
     const dbType = typeMap[type] || 'general'
 

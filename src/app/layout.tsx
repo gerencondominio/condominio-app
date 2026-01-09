@@ -19,6 +19,8 @@ export const metadata: Metadata = {
 
 import { BottomNav } from "@/components/ui/BottomNav";
 import { Sidebar } from "@/components/ui/Sidebar";
+import { ToastProvider } from "@/components/ui/Toast";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -26,15 +28,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className="antialiased bg-background text-foreground pb-20 lg:pb-0" suppressHydrationWarning>
-        <Sidebar />
-        <main className="lg:pl-64 min-h-screen">
-          {children}
-        </main>
-        <div className="lg:hidden">
-          <BottomNav />
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ToastProvider>
+            <Sidebar />
+            <main className="lg:pl-64 min-h-screen">
+              {children}
+            </main>
+            <div className="lg:hidden">
+              <BottomNav />
+            </div>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

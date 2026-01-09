@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { toggleLike, addComment, getComments } from '@/app/comunidade/actions'
 import { Input } from '@/components/ui/Input'
+import confetti from 'canvas-confetti'
 
 export function PostCard({ post }: { post: any }) {
     const [isHearted, setIsHearted] = useState(post.likedByMe)
@@ -17,11 +18,28 @@ export function PostCard({ post }: { post: any }) {
     const [newComment, setNewComment] = useState('')
     const [loadingComments, setLoadingComments] = useState(false)
 
-    const handleLike = async () => {
+    const handleLike = async (e: React.MouseEvent) => {
+        // Prevent event bubbling if needed, though button is clickable
         // Optimistic UI
         const newIsHearted = !isHearted
         setIsHearted(newIsHearted)
         setLikesCount((prev: number) => newIsHearted ? prev + 1 : prev - 1)
+
+        if (newIsHearted) {
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            const x = (rect.left + rect.width / 2) / window.innerWidth;
+            const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+            confetti({
+                origin: { x, y },
+                particleCount: 40,
+                spread: 60,
+                startVelocity: 20,
+                colors: ['#3b82f6', '#ef4444', '#f59e0b'], // Blue, Red, Amber
+                disableForReducedMotion: true,
+                scalar: 0.6 // Smaller particles
+            })
+        }
 
         await toggleLike(post.id)
     }
@@ -86,8 +104,15 @@ export function PostCard({ post }: { post: any }) {
             </p>
 
             <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px] font-normal text-gray-600 bg-gray-100 hover:bg-gray-200">
-                    {post.type === 'suggestion' ? 'Sugestão' : post.type === 'maintenance' ? 'Manutenção' : post.type === 'notice' ? 'Aviso' : 'Geral'}
+                <Badge variant="secondary" className={`text-[10px] font-normal ${post.type === 'suggestion' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' :
+                    post.type === 'maintenance' ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' :
+                        post.type === 'complaint' ? 'bg-red-100 text-red-700 hover:bg-red-200' :
+                            'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}>
+                    {post.type === 'suggestion' ? 'Sugestão' :
+                        post.type === 'maintenance' ? 'Manutenção' :
+                            post.type === 'complaint' ? 'Reclamação' :
+                                post.type === 'notice' ? 'Aviso' : 'Geral'}
                 </Badge>
             </div>
 
